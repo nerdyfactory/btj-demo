@@ -14,14 +14,14 @@ function setType() {
 line = null
 
 function onDragStart(e) {
-	var dom = $(`#${type} .start`)
+  var dom = $(`#${type} .start`)
   dom.css('display', 'block');
   dom.css('top', (e.pageY - 5) + "px");
   dom.css('left', (e.pageX - 5) + "px");
   $(`#${type} .end`).css('display', 'block');
   startX = e.pageX
   startY = e.pageY
-	updateLine(`#${type} .line`, e.pageX, e.pageY, e.pageX, e.pageY);
+  updateLine(`#${type} .line`, e.pageX, e.pageY, e.pageX, e.pageY);
   var pos = $('.draggable').offset();
   $(`.${type} input.start`).val((e.pageX - pos.left) + "," + (e.pageY - pos.top))
 }
@@ -30,7 +30,7 @@ function onDragMove(e) {
   var dom = $(`#${type} .end`)
   dom.css('top', (e.pageY-5) + "px");
   dom.css('left', (e.pageX-5) + "px");
-	updateLine(`#${type} .line`, startX, startY, e.pageX, e.pageY);
+  updateLine(`#${type} .line`, startX, startY, e.pageX, e.pageY);
 }
 
 function onDragEnd(e) {
@@ -54,13 +54,13 @@ function updateLine(selector, x1, y1, x2, y2) {
   var x = sx - c / 2,
       y = sy;
   var alpha = Math.PI - Math.atan2(-b, a);
-	
-	var dom = $(selector);
-	dom.css('top', y + "px");
-	dom.css('left', x + "px");
-	dom.css('width', c + "px");
-	dom.css('-moz-transform', "rotate(" + alpha + "rad)");
-	dom.css('-webkit-transform', "rotate(" + alpha + "rad)");
-	dom.css('-o-transform', "rotate(" + alpha + "rad)");
-	dom.css('-ms-transform', "rotate(" + alpha + "rad)");
+  
+  var dom = $(selector);
+  dom.css('top', y + "px");
+  dom.css('left', x + "px");
+  dom.css('width', c + "px");
+  dom.css('-moz-transform', "rotate(" + alpha + "rad)");
+  dom.css('-webkit-transform', "rotate(" + alpha + "rad)");
+  dom.css('-o-transform', "rotate(" + alpha + "rad)");
+  dom.css('-ms-transform', "rotate(" + alpha + "rad)");
 }

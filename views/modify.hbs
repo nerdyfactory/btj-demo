@@ -5,53 +5,53 @@
     </div>
   </div>
   <div class="row">
-		<form action="/modify/{{filename}}" method="post">
-		  <div class="row">
-		  	<div class="four columns">
-		  	  <label>Type</label>
-		  	</div>
-		  	<div class="four columns">
-		  	  <label>Start</label>
-		  	</div>
-		  	<div class="four columns">
-		  	  <label>End</label>
-		  	</div>
-		  </div>
-		  <div class="row arm">
-		  	<div class="four columns">
-					<input type="radio" name="arm" value="arm" checked onClick="setType.call(this)">팔기장<br>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="start" name="armStart"/>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="end" name="armEnd"/>
-		  	</div>
-		  </div>
-		  <div class="row chest">
-		  	<div class="four columns">
-					<input type="radio" name="chest" value="chest" onClick="setType.call(this)">가슴둘레<br>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="start" name="chestStart"/>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="end" name="chestEnd"/>
-		  	</div>
-		  </div>
-		  <div class="row height">
-		  	<div class="four columns">
-					<input type="radio" name="height" value="height" onClick="setType.call(this)">총기장<br>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="start" name="heightStart"/>
-		  	</div>
-		  	<div class="four columns">
-					<input type="text" class="end" name="heightEnd"/>
-		  	</div>
-		  </div>
-		  <input class="button-primary" type="submit" value="Submit">
-		</form>
+    <form action="/modify/{{filename}}" method="post">
+      <div class="row">
+        <div class="four columns">
+          <label>Type</label>
+        </div>
+        <div class="four columns">
+          <label>Start</label>
+        </div>
+        <div class="four columns">
+          <label>End</label>
+        </div>
+      </div>
+      <div class="row arm">
+        <div class="four columns">
+          <input type="radio" name="arm" value="arm" checked onClick="setType.call(this)">팔기장<br>
+        </div>
+        <div class="four columns">
+          <input type="text" class="start" name="armStart"/>
+        </div>
+        <div class="four columns">
+          <input type="text" class="end" name="armEnd"/>
+        </div>
+      </div>
+      <div class="row chest">
+        <div class="four columns">
+          <input type="radio" name="chest" value="chest" onClick="setType.call(this)">가슴둘레<br>
+        </div>
+        <div class="four columns">
+          <input type="text" class="start" name="chestStart"/>
+        </div>
+        <div class="four columns">
+          <input type="text" class="end" name="chestEnd"/>
+        </div>
+      </div>
+      <div class="row height">
+        <div class="four columns">
+          <input type="radio" name="height" value="height" onClick="setType.call(this)">총기장<br>
+        </div>
+        <div class="four columns">
+          <input type="text" class="start" name="heightStart"/>
+        </div>
+        <div class="four columns">
+          <input type="text" class="end" name="heightEnd"/>
+        </div>
+      </div>
+      <input class="button-primary" type="submit" value="Submit">
+    </form>
   </div>
   <div id="arm">
     <div class="circle start"></div>
