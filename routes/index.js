@@ -38,12 +38,14 @@ router.post('/modify/:filename', (req, res, next) => {
     `'${JSON.stringify(req.body)}'`,
   ].join(' ');
   exec(cmd, (error, stdout, stderr) => {
-    console.log("error: ----------------------------");
-    console.log(error);
+    if (error) {
+      console.log("error: ----------------------------");
+      console.log(error);
+      console.log(stderr);
+      return res.status(500).send(stderr);
+    }
     console.log("stdout: ----------------------------");
     console.log(stdout);
-    console.log("stderr: ----------------------------");
-    console.log(stderr);
 	  res.redirect('/result/' + req.params.filename);
   })
 });
