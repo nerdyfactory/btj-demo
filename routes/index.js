@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var multer  = require('multer');
 const exec = require('child_process').exec;
+const querystring = require('querystring');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -45,14 +46,20 @@ router.post('/modify/:filename', (req, res, next) => {
       return res.status(500).send(stderr);
     }
     console.log("stdout: ----------------------------");
-    console.log(stdout);
-	  res.redirect('/result/' + req.params.filename);
+    console.log(stdout)
+    size = stdout.trim().split(" ");
+	  res.redirect('/result/' + req.params.filename + "?" + querystring.stringify({
+      arm: size[0],
+      chest: size[1],
+      height: size[2],
+    }));
   })
 });
 
 // show result
 router.get('/result/:filename', (req, res, next) => {
-  res.render('result', {filename: req.params.filename});
+  console.log(req.query)
+  res.render('result', {filename: req.params.filename, size: req.query});
 });
 
 module.exports = router;

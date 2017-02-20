@@ -34,56 +34,64 @@ def filterChildren(contours, hierarchy):
                 map(lambda (i, h): -1 if h[3] != -1 else i,
                     enumerate(hierarchy[0]))))
 
+def shirtCountour():
+    if shirtCountour.shirtShape is None:
+        img = cv2.imread('./data/FullSizeRender.jpg', 1)
+        img = graySplit(img)
+        img, contours, hierarchy = cv2.findContours(img, cv2.RETR_CCOMP, 1)
+        contours = filterChildren(contours, hierarchy)
+        height, width = img.shape
+        minSize = height * width * 0.005
+        contours = filterContours(contours, minSize)
+        #displayContours(img, contours)
+        shirtCountour.shirtShape = contours[0]
+    return shirtCountour.shirtShape
+shirtCountour.shirtShape = None
+
+def bestFit(contours, shape):
+    scores = map(lambda cnt: cv2.matchShapes(cnt,shape,1,0), contours)
+    return contours[scores.index(min(scores))]
+
 def graySplit(img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    saveImg(img, filename + "2.png")
     img = cv2.GaussianBlur(img,(5,5),0)
-    saveImg(img, filename + "3.png")
     _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    saveImg(img, filename + "4.png")
     img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
             cv2.THRESH_BINARY,51,2)
     return img
 
 def hsbSplit(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    saveImg(img, filename + "2.png")
     h,s,v = cv2.split(img)
-    saveImg(h, filename + "3.png")
     _, img = cv2.threshold(h, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    saveImg(img, filename + "4.png")
+    #img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+    #img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
     return img
 
 def displayContours(img, contours):
     for cnt in contours:
-        img = cv2.drawContours(img, [cnt], 0, (0,255,0), 10)
-    return img
-
-def getLength(ptr1, ptr2):
-    distanceX = ptr1[0] - ptr2[0]
-    distanceY = ptr1[1] - ptr2[1]
-    return np.sqrt(np.square(distanceX) + np.square(distanceY))
+        tmp = img.copy()
+        tmp = cv2.drawContours(tmp, [cnt], 0, (0,0,0), 30)
+        saveImg(tmp)
 
 def transform(approx, img):
     sortX = sorted(map(lambda p: p[0][0], approx))
     sortY = sorted(map(lambda p: p[0][1], approx))
 
-    distanceX = sortX[3]-sortX[0]
-    distanceY = sortY[3]-sortY[0]
-
-    #vertically laid
-    if distanceY > distanceX:
-        ratio = np.float64(297)/np.float64(210)
-    #horizontally laid
+    #vertical 
+    if sortY[3] - sortY[0] > sortX[3] - sortX[0]:
+        distanceY = (sortX[3]-sortX[0])*297/210  
+    #horizontal
     else:
-        ratio = np.float64(210)/np.float64(297)
+        distanceY = (sortX[3]-sortX[0])*210/297
+
     baseX = int(width * 0.2)
     baseY = int(height * 0.2)
     pos = [
             [baseX + sortX[0], baseY + sortY[0]],
             [baseX + sortX[2], baseY + sortY[0]],
-            [baseX + sortX[2], baseY + sortY[0] + distanceX*ratio],
-            [baseX + sortX[0], baseY + sortY[0] + distanceX*ratio],
+            [baseX + sortX[2], baseY + sortY[0] + distanceY],
+            [baseX + sortX[0], baseY + sortY[0] + distanceY],
             ]
     avgX = np.average(sortX)
     avgY = np.average(sortY)
@@ -106,20 +114,18 @@ def transform(approx, img):
     pts1 = np.float32(approx)
     pts2 = np.float32(map(getPos, approx))
     M = cv2.getPerspectiveTransform(pts1,pts2)
-    return (cv2.warpPerspective(img,M,(int(width*1.5),int(height*1.5))), M, distanceX)
+    return (cv2.warpPerspective(img,M,(int(width*1.5),int(height*1.5))), M)
 
 
 
-#main script starts here
-data = json.loads(sys.argv[2]) #points passed from web page
-filename = sys.argv[1] # image file name
+data = json.loads(sys.argv[2])
+filename = sys.argv[1]
 
 imgOrg = cv2.imread('public/uploads/%s' % (filename), 1)
 img = imgOrg.copy()
 
 height, width, channels = img.shape
 
-#width of image in web page is 600px so convert points based on original image size
 ratio = np.float64(width)/600
 
 armStart = map(lambda s: int(np.float64(s) * ratio),  data['armStart'].split(','))
@@ -150,29 +156,17 @@ img = cv2.circle(img,tuple(heightEnd),10,[0,0,0],-1)
 
 saveImg(img, filename + "1.png")
 img = imgOrg.copy()
-
-#thresholding a image
 img = hsbSplit(img)
-#img = graySplit(img)
+saveImg(img, filename + "2.png")
 
-#find contours
+
 img, contours, hierarchy = cv2.findContours(img, cv2.RETR_CCOMP, 1)
-
-# just use contours which is children
 contours = filterChildren(contours, hierarchy)
-
-# filter contours baseon size
+height, width = img.shape
 minSize = height * width * 0.005
 contours = filterContours(contours, minSize)
 if len(contours) == 0:
     sys.exit()
-
-img = imgOrg.copy()
-img = displayContours(img, contours)
-
-saveImg(img, filename + "5.png")
-
-# convert contour selected to reactacle
 contour = smallestContour(contours)
 imgOrg = cv2.drawContours(imgOrg, [contour], 0, (0,0,0), 2)
 arcLength = cv2.arcLength(contour,True)
@@ -183,12 +177,8 @@ while(1):
     if len(approx) > 3 or tmp <=0:
         break
     tmp = tmp - 0.001
-
 imgOrg = cv2.drawContours(imgOrg, [approx], 0, (0,255,0), 3)
-
-
-# perspectiveTransform the image
-imgOrg, M, a4width = transform(approx, imgOrg)
+imgOrg, M = transform(approx, imgOrg)
 
 points1 = cv2.perspectiveTransform(np.array([points1]), M)
 points2 = cv2.perspectiveTransform(np.array([points2]), M)
@@ -198,11 +188,18 @@ imgOrg = cv2.circle(imgOrg,tuple(points1[0][2]),10,[0,0,0],-1)
 imgOrg = cv2.circle(imgOrg,tuple(points2[0][0]),10,[0,0,0],-1)
 imgOrg = cv2.circle(imgOrg,tuple(points2[0][1]),10,[0,0,0],-1)
 imgOrg = cv2.circle(imgOrg,tuple(points2[0][2]),10,[0,0,0],-1)
-saveImg(imgOrg, filename + "6.png")
+saveImg(imgOrg, filename + "3.png")
 
-# calculate size based on the points on the transformed image
-ratio = np.float32(210)/np.float32(a4width)
-sizeArm = getLength(points1[0][0], points1[0][1])
-sizeChest = getLength(points1[0][2], points2[0][0])
-sizeHeight = getLength(points2[0][1], points2[0][2])
-print sizeArm*ratio, sizeChest*ratio, sizeHeight*ratio
+
+
+#hull = cv2.convexHull(largestCnt, returnPoints = False)
+#defects = cv2.convexityDefects(largestCnt, hull)
+#
+#for i in range(defects.shape[0]):
+#    s,e,f,_ = defects[i,0]
+#    #print cnt.size, s, e, f
+#    start = tuple(largestCnt[s][0])
+#    end = tuple(largestCnt[e][0])
+#    far = tuple(largestCnt[f][0])
+#    cv2.line(img,start,end,[0,255,0],2)
+#    cv2.circle(img,far,10,[0,0,255],-1)

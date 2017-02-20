@@ -9,6 +9,8 @@ function setType() {
   });
   $(this).prop('checked', true);
   type = this.value
+  $(`.${type} input.start`).val("")
+  $(`.${type} input.end`).val("")
 }
 
 line = null
